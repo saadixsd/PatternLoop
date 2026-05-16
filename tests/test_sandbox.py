@@ -1,6 +1,18 @@
 from pathlib import Path
 
+from patternloop.tools.registry import parse_tool_call_json
 from patternloop.tools.sandbox import FileSandbox
+
+
+def test_parse_tool_call_strips_markdown_bold() -> None:
+    text = """
+Intro blah
+
+**TOOL_CALL:** {"name": "list_dir", "arguments": {"path": "."}}
+"""
+    name, args = parse_tool_call_json(text)
+    assert name == "list_dir"
+    assert args == {"path": "."}
 
 
 def test_sandbox_read(tmp_path: Path) -> None:

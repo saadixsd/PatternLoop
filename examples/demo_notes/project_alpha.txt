@@ -1,0 +1,7 @@
+Project Alpha — weekly sync notes
+
+Theme 1: We decided to ship the MVP with local-only inference first, then add optional cloud connectors later.
+
+Theme 2: Risk — users may confuse read-only tools with full shell access; docs must stress --workdir sandbox.
+
+Theme 3: Next step — record a 60-second demo GIF for the README.

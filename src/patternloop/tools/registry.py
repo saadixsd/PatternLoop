@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
 from patternloop.tools.sandbox import FileSandbox, ToolResult
@@ -57,19 +58,22 @@ def tools_schema_for_ollama() -> list[dict[str, Any]]:
 
 
 def parse_tool_call_json(text: str) -> tuple[str | None, dict[str, Any] | None]:
-    """Extract tool call from model output; expects a line like TOOL_CALL: {...}."""
+    """Extract tool call from model output; expects TOOL_CALL: {...} on a line (markdown bold tolerated)."""
 
-    prefix = "TOOL_CALL:"
-    for line in text.splitlines():
-        line = line.strip()
-        if line.startswith(prefix):
-            payload = line[len(prefix) :].strip()
-            try:
-                obj = json.loads(payload)
-                name = obj.get("name")
-                args = obj.get("arguments") or {}
-                if isinstance(name, str) and isinstance(args, dict):
-                    return name, args
-            except json.JSONDecodeError:
-                return None, None
+    # Models often wrap the trigger as **TOOL_CALL:** {...}
+    line_pat = re.compile(r"^\*{0,}TOOL_CALL:\*{0,}\s*(\{.*\})\s*$", re.IGNORECASE)
+    for raw in text.splitlines():
+        line = raw.strip().strip("*").strip()
+        m = line_pat.search(line)
+        if not m:
+            continue
+        payload = m.group(1)
+        try:
+            obj = json.loads(payload)
+            name = obj.get("name")
+            args = obj.get("arguments") or {}
+            if isinstance(name, str) and isinstance(args, dict):
+                return name, args
+        except json.JSONDecodeError:
+            return None, None
     return None, None

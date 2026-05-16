@@ -1,0 +1,4 @@
+Loose snippets from research
+
+- Competitors often default to cloud APIs; our angle is LoopSpec on disk + local Ollama.
+- Evaluator loop (score + adapt) is the main retention hook vs one-shot prompts.

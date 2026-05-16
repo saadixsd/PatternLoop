@@ -69,7 +69,7 @@ def launch_dashboard(host: str = "127.0.0.1", port: int = 7860) -> None:
             pattern = gr.Textbox(label="Pattern name", value="research_digest")
             goal = gr.Textbox(label="Goal", value="Summarize ./notes")
             workdir = gr.Textbox(label="Workdir (allowlisted)", value=str(Path.home()))
-        mock = gr.Checkbox(label="Mock backend (no Ollama)", value=True)
+        mock = gr.Checkbox(label="Mock backend (no Ollama)", value=False)
         out = gr.Textbox(label="Output", lines=16)
         run_btn = gr.Button("Run")
         run_btn.click(run_fn, inputs=[pattern, goal, workdir, mock], outputs=out)

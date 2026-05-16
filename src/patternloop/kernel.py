@@ -64,6 +64,48 @@ def _success_check(spec: LoopSpec, answer: str) -> bool:
     return all(k.lower() in lower for k in spec.success.keywords)
 
 
+def _list_dir_coverage(messages: list[str]) -> tuple[bool, set[str], set[str]]:
+    """Whether reads are pending, wanted basenames from latest good list_dir, basenames read ok after it."""
+
+    last_good_idx: int | None = None
+    entries: list[str] = []
+    for i, m in enumerate(messages):
+        if not m.startswith("tool:list_dir ->"):
+            continue
+        try:
+            obj = json.loads(m.split("->", 1)[1].strip())
+        except (json.JSONDecodeError, TypeError, IndexError):
+            continue
+        if not obj.get("ok"):
+            continue
+        ent = (obj.get("data") or {}).get("entries")
+        if isinstance(ent, list) and len(ent) > 0:
+            last_good_idx = i
+            entries = [str(x) for x in ent]
+    if last_good_idx is None:
+        return False, set(), set()
+
+    want = {Path(e).name for e in entries}
+    read_names: set[str] = set()
+    for m in messages[last_good_idx + 1 :]:
+        if not m.startswith("tool:read_file ->"):
+            continue
+        try:
+            robj = json.loads(m.split("->", 1)[1].strip())
+        except (json.JSONDecodeError, TypeError, IndexError):
+            continue
+        if not robj.get("ok"):
+            continue
+        p = (robj.get("data") or {}).get("path")
+        if isinstance(p, str):
+            read_names.add(Path(p).name)
+
+    pending = not want.issubset(read_names)
+    return pending, want, read_names
+
+
+
+
 @dataclass
 class RunResult:
     ok: bool
@@ -111,6 +153,12 @@ def run_pattern(
             "Available tools: read_file, list_dir. "
             "Emit at most one TOOL_CALL per assistant message as: "
             'TOOL_CALL: {"name": "read_file", "arguments": {"path": "..."}}\n'
+            'Paths must stay inside the user work directory only: start with list_dir on "." '
+            'then read_file each entry name you saw (for example "notes.txt"). '
+            "Do not invent absolute paths or folders like /allowed/.\n"
+            "After a successful list_dir, your very next message must be exactly one "
+            'TOOL_CALL read_file for one filename from that entries list (exact spelling); '
+            "then alternate tool calls until all relevant text files are read.\n"
             "When done, emit a line starting with FINAL:"
         )
         user = (
@@ -129,6 +177,15 @@ def run_pattern(
             state.messages.append(f"tool:{tool_name} -> {safe_json(res.model_dump())}")
             if memory:
                 memory.append(run_id, "tool", {"name": tool_name, "result": res.model_dump()})
+            continue
+
+        pending_reads, want, read_ok = _list_dir_coverage(state.messages)
+        if pending_reads:
+            missing = sorted(want - read_ok)
+            state.messages.append(
+                "system: list_dir is complete. Read every remaining file using exact names "
+                f"(copy/paste): {missing}. One TOOL_CALL read_file per message; do not invent names."
+            )
             continue
 
         candidate = _extract_final(assistant) or assistant.strip()
