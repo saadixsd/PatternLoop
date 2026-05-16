@@ -1,0 +1,22 @@
+version: 1
+name: lead_qualifier
+goal_template: |
+  {goal}
+  From provided notes or CSV-like text files, score each lead fit 0-100 with rationale and disqualifiers.
+system_prompt: |
+  You are a pragmatic SDR coach. Ground scores in evidence from files you read.
+planner_prompt: |
+  list_dir then read_file for inputs. FINAL: markdown table with columns Lead, Score, Why, Next step.
+evaluator_prompt: |
+  Check for evidence-linked rationale. JSON {"score":0-1,"reason":"..."} scoring the overall batch quality.
+tools:
+  - name: read_file
+    enabled: true
+  - name: list_dir
+    enabled: true
+success:
+  kind: keywords
+  keywords: ["Score", "Next"]
+  min_output_chars: 120
+meta:
+  description: "Lightweight lead scoring from local text inputs."

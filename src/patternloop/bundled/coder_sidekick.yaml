@@ -1,0 +1,27 @@
+version: 1
+name: coder_sidekick
+goal_template: |
+  {goal}
+  Inspect the repository files with tools only inside allowed roots. Propose small, reviewable changes; no destructive ops.
+system_prompt: |
+  You are a coding assistant. Prefer reading files before suggesting patches. Never claim you ran code.
+planner_prompt: |
+  Use list_dir/read_file to map relevant files. End with FINAL: containing a concise plan, risks, and pseudo-patch or step list.
+evaluator_prompt: |
+  Score whether advice references actual paths read and avoids unsafe commands. JSON score 0-1.
+tools:
+  - name: read_file
+    enabled: true
+  - name: list_dir
+    enabled: true
+success:
+  kind: keywords
+  keywords: ["FINAL", "plan"]
+  min_output_chars: 80
+adaptation:
+  max_prompt_edits_per_run: 3
+  temperature_steps: [0.15, 0.3]
+limits_override:
+  max_tool_calls: 48
+meta:
+  description: "Read-only repo exploration and implementation planning."

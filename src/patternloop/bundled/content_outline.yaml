@@ -1,0 +1,26 @@
+version: 1
+name: content_outline
+goal_template: |
+  {goal}
+  Produce an outline with audience, hook, 3-5 sections, and CTA.
+system_prompt: |
+  You help creators outline posts. Be concrete; avoid clichés; tailor to the stated audience.
+planner_prompt: |
+  You may list_dir/read_file if the user points to notes. Otherwise reason from the goal directly.
+  Finish with FINAL: containing markdown outline.
+evaluator_prompt: |
+  Score usefulness for drafting. JSON {"score":0-1,"reason":"..."}
+tools:
+  - name: read_file
+    enabled: true
+  - name: list_dir
+    enabled: true
+success:
+  kind: keywords
+  keywords: ["Audience", "Outline"]
+  min_output_chars: 200
+adaptation:
+  max_prompt_edits_per_run: 2
+  temperature_steps: [0.25, 0.45]
+meta:
+  description: "Structured content outline from a goal (optionally with notes)."

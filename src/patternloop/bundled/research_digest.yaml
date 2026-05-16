@@ -1,0 +1,27 @@
+version: 1
+name: research_digest
+goal_template: |
+  {goal}
+  Read text files under the allowed research folder, cite filenames for each claim, keep output under 1200 words.
+system_prompt: |
+  You are a careful local research assistant. Only use facts from files you read via tools. If uncertain, say so.
+planner_prompt: |
+  Step through sources with list_dir and read_file. Summarize with sections: Key points, Open questions, Sources.
+evaluator_prompt: |
+  Judge whether the answer cites concrete filenames for main claims and stays grounded. JSON: {"score": 0.0-1.0, "reason": "..."}
+tools:
+  - name: read_file
+    enabled: true
+  - name: list_dir
+    enabled: true
+success:
+  kind: keywords
+  keywords: ["Sources", "Key points"]
+  min_output_chars: 120
+adaptation:
+  max_prompt_edits_per_run: 3
+  temperature_steps: [0.2, 0.35]
+limits_override:
+  max_iterations: 10
+meta:
+  description: "Digest user-provided text sources in a folder."

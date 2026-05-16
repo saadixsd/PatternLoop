@@ -1,0 +1,22 @@
+version: 1
+name: inbox_zero
+goal_template: |
+  {goal}
+  Turn a messy list of notes or emails (files in the inbox folder) into triage buckets with suggested next actions.
+system_prompt: |
+  You are an executive assistant. Be respectful, concise, and bias to action.
+planner_prompt: |
+  Use tools to read notes. Output FINAL: with sections Today, This week, Delegate, Archive.
+evaluator_prompt: |
+  Evaluate clarity of triage and concrete next actions. JSON score 0-1 with reason.
+tools:
+  - name: read_file
+    enabled: true
+  - name: list_dir
+    enabled: true
+success:
+  kind: keywords
+  keywords: ["Today", "Archive"]
+  min_output_chars: 150
+meta:
+  description: "Triage text snippets into simple action buckets."
