@@ -1,4 +1,5 @@
-# PatternLoop — local loops that adapt until the goal lands
+# PatternLoop — The Linux for personal AI employees
+Local loops that adapt until the goal lands 
 
 PatternLoop is a local-first CLI that turns repeatable workflows into versioned **LoopSpecs** (YAML), then runs a tight loop: plan, read files with tools, answer, score the answer, and adapt hints until checks pass or limits hit.
 
@@ -65,6 +66,7 @@ flowchart TD
 
 | Term | Meaning |
 |------|--------|
+| **LoopSpec** | The versioned YAML “recipe”: prompts, success checks, limits, allowed tools. Bundled specs live in the package; `agents install` copies one into your data dir as an installed pattern file. |
 | **Pattern / agent name** | First argument to `run`: the stem of the YAML file (for example `research_digest`). Not the same as `--goal`. |
 | **`--goal`** | Plain-language instructions for *this* run. |
 | **`--workdir`** | Folder tools are allowed to read. Must exist. Use `.` only if your shell’s current directory is the folder you intend. |
