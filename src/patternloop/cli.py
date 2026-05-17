@@ -241,6 +241,8 @@ def ui(
 
     from patternloop.ui.dashboard import launch_dashboard
 
+    console.print(f"[bold]Starting UI[/bold] at http://{host}:{port}/")
+    console.print("[dim]Wait for 'Running on local URL' before opening the browser.[/dim]")
     launch_dashboard(host=host, port=port)
 
 

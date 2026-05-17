@@ -17,6 +17,13 @@ from patternloop.tools.registry import ToolRegistry
 from patternloop.tools.sandbox import FileSandbox
 
 
+def _default_workdir() -> str:
+    demo = Path.cwd() / "examples" / "demo_notes"
+    if demo.is_dir():
+        return str(demo.resolve())
+    return str(Path.home())
+
+
 def launch_dashboard(host: str = "127.0.0.1", port: int = 7860) -> None:
     layout = ensure_layout()
     cfg_path = default_config_path(layout["root"])
@@ -67,8 +74,8 @@ def launch_dashboard(host: str = "127.0.0.1", port: int = 7860) -> None:
         gr.Markdown("# PatternLoop (local)")
         with gr.Row():
             pattern = gr.Textbox(label="Pattern name", value="research_digest")
-            goal = gr.Textbox(label="Goal", value="Summarize ./notes")
-            workdir = gr.Textbox(label="Workdir (allowlisted)", value=str(Path.home()))
+            goal = gr.Textbox(label="Goal", value="Summarize themes; cite filenames.")
+            workdir = gr.Textbox(label="Workdir (allowlisted)", value=_default_workdir())
         mock = gr.Checkbox(label="Mock backend (no Ollama)", value=False)
         out = gr.Textbox(label="Output", lines=16)
         run_btn = gr.Button("Run")
@@ -79,4 +86,8 @@ def launch_dashboard(host: str = "127.0.0.1", port: int = 7860) -> None:
         export_btn = gr.Button("Export .agent")
         export_btn.click(export_fn, inputs=[export_pattern], outputs=export_out)
 
-    demo.launch(server_name=host, server_port=port, share=False)
+    url = f"http://{host}:{port}/"
+    print(f"PatternLoop UI loading (Gradio may take 30-60s on first start)...", flush=True)
+    print(f"Open in browser when ready: {url}", flush=True)
+    print("Leave this terminal open. Press Ctrl+C to stop.", flush=True)
+    demo.launch(server_name=host, server_port=port, share=False, show_error=True)

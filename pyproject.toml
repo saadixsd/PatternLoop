@@ -36,6 +36,12 @@ dev = ["pytest>=8.0", "ruff>=0.8"]
 [project.scripts]
 patternloop = "patternloop.cli:main"
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.setuptools.package-data]
 patternloop = ["bundled/*.yaml"]
 
